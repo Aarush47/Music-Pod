@@ -1,0 +1,295 @@
+1:import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+2-import { ChevronLeft, ChevronRight, Play, Pause, SkipBack, SkipForward, Shuffle, Repeat2, ListPlus, Volume2, Cast, Heart, MoreVertical } from "lucide-react";
+3-import { motion } from "motion/react";
+--
+289-
+290-function EditSongScreen({ editingTrack, tracks, currentTrack, t, getTrackGenre, setTracks, setCurrentTrack, saveTracks, goBack }: EditSongScreenProps) {
+291:  const titleRef = useRef<HTMLInputElement>(null);
+292:  const artistRef = useRef<HTMLInputElement>(null);
+293:  const albumRef = useRef<HTMLInputElement>(null);
+294:  const genreRef = useRef<HTMLInputElement>(null);
+295:  const lyricsRef = useRef<HTMLTextAreaElement>(null);
+296-
+297-  const handleSave = () => {
+--
+520-  mutedColor: string;
+521-}) {
+522:  const [bars, setBars] = useState<number[]>(new Array(32).fill(0));
+523:  const smoothedData = useRef<number[]>(new Array(32).fill(0));
+524:  const reqRef = useRef<number>(0);
+525-
+526:  useEffect(() => {
+527-    if (!analyser || !active) return;
+528-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+--
+595-
+596-function VirtualizedTrackList({ tracks, renderItem }: VirtualizedTrackListProps) {
+597:  const parentRef = useRef<HTMLDivElement>(null);
+598-  
+599-  const rowVirtualizer = useVirtualizer({
+--
+634-
+635-export default function App() {
+636:  const [theme, setTheme] = useState<Theme>("black");
+637:  const [screen, setScreen] = useState<Screen>("home");
+638:  const [screenHistory, setScreenHistory] = useState<Screen[]>([]);
+639:  const screenHistoryRef = useRef<Screen[]>([]);
+640-
+641:  useEffect(() => {
+642-    screenHistoryRef.current = screenHistory;
+643-  }, [screenHistory]);
+644-
+645:  const [activeIndex, setActiveIndex] = useState(0);
+646:  const [isPlaying, setIsPlaying] = useState(false);
+647:  const [progress, setProgress] = useState(0);
+648:  const [volume, setVolume] = useState(1);
+649:  const isSeeking = useRef(false);
+650-
+651:  const [tracks, setTracks] = useState<Track[]>([]);
+652:  const [currentTrack, setCurrentTrack] = useState<Track>(EMPTY_TRACK);
+653:  const [isScanning, setIsScanning] = useState(false);
+654-
+655:  const [shuffle, setShuffle] = useState(false);
+656:  const shuffleOrder = useRef<number[]>([]);
+657:  const shufflePointer = useRef(0);
+658:  const [repeat, setRepeat] = useState(false);
+659:  const [slideIndex, setSlideIndex] = useState(0);
+660:  const [cflowIndex, setCflowIndex] = useState(0);
+661:  const [time, setTime] = useState(new Date());
+662-
+663-  // Additional music management states
+664:  const [playlists, setPlaylists] = useState<Record<string, number[]>>({});
+665:  const [selectedPlaylistName, setSelectedPlaylistName] = useState<string>("");
+666:  const [selectedArtist, setSelectedArtist] = useState<string>("");
+667:  const [selectedAlbum, setSelectedAlbum] = useState<string>("");
+668:  const [selectedGenre, setSelectedGenre] = useState<string>("");
+669:  const [searchInput, setSearchInput] = useState<string>("");
+670:  const [searchQuery, setSearchQuery] = useState<string>("");
+671:  const [selectedOptionTrack, setSelectedOptionTrack] = useState<Track | null>(null);
+672:  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+673:  const [isPlaylistSelectOpen, setIsPlaylistSelectOpen] = useState(false);
+674:  const [isAddSongsToPlaylistOpen, setIsAddSongsToPlaylistOpen] = useState(false);
+675:  const [editingTrack, setEditingTrack] = useState<Track | null>(null);
+676:  const [newPlaylistName, setNewPlaylistName] = useState("");
+677:  const [isCreatingModalPlaylist, setIsCreatingModalPlaylist] = useState(false);
+678:  const [modalPlaylistName, setModalPlaylistName] = useState("");
+679-
+680:  const volDragRef = useRef<{ startY: number, startVol: number } | null>(null);
+681:  const [volumeOverlay, setVolumeOverlay] = useState<number | null>(null);
+682-
+683:  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+684-
+685:  useEffect(() => {
+686-    const onResize = () => setIsLandscape(window.innerWidth > window.innerHeight);
+687-    window.addEventListener("resize", onResize);
+--
+689-  }, []);
+690-
+691:  const [crossfadeDuration, setCrossfadeDuration] = useState(2500);
+692-
+693:  const audioRefA = useRef<HTMLAudioElement | null>(null);
+694:  const audioRefB = useRef<HTMLAudioElement | null>(null);
+695:  const activeAudioRef = useRef<'A' | 'B'>('A');
+696-
+697:  const audioRef = useMemo(() => {
+698-    return {
+699-      get current() {
+--
+703-  }, []);
+704-
+705:  const audioCtxRef = useRef<AudioContext | null>(null);
+706:  const gainARef = useRef<GainNode | null>(null);
+707:  const gainBRef = useRef<GainNode | null>(null);
+708:  const masterGainRef = useRef<GainNode | null>(null);
+709:  const analyserRef = useRef<AnalyserNode | null>(null);
+710:  const prevShuffleRef = useRef(false);
+711:  const prevTrackCountRef = useRef(0);
+712:  const currentTrackIdRef = useRef(currentTrack.id);
+713-  currentTrackIdRef.current = currentTrack.id;
+714-
+715:  const isPlaylistsLoaded = useRef(false);
+716:  const fileInputRef = useRef<HTMLInputElement>(null);
+717:  const lastPlayedUrl = useRef<string | null>(null);
+718-  const t = THEMES[theme];
+719-
+720-  // Load cached songs and playlists on mount
+721:  useEffect(() => {
+722-    const loadCachedData = async () => {
+723-      try {
+--
+794-
+795-  // Save playlists whenever it changes
+796:  useEffect(() => {
+797-    if (!isPlaylistsLoaded.current) return;
+798-    const savePlaylists = async () => {
+--
+810-
+811-  // Debounce search input for large libraries
+812:  useEffect(() => {
+813-    const timer = setTimeout(() => setSearchQuery(searchInput), 150);
+814-    return () => clearTimeout(timer);
+815-  }, [searchInput]);
+816-
+817:  const filteredTracks = useMemo(() => {
+818-    if (!searchQuery.trim()) return tracks;
+819-    const q = searchQuery.toLowerCase();
+--
+826-
+827-  // Background artwork extraction for tracks that missed it
+828:  useEffect(() => {
+829-    if (tracks.length === 0) return;
+830-    
+--
+900-  };
+901-
+902:  useEffect(() => {
+903-    const timer = setInterval(() => setTime(new Date()), 10000);
+904-    return () => clearInterval(timer);
+905-  }, []);
+906-
+907:  useEffect(() => {
+908-    const timer = setInterval(() => {
+909-      if (tracks.length > 0) {
+--
+914-  }, [tracks]);
+915-
+916:  const navigate = useCallback(
+917-    (to: Screen) => {
+918-      setScreenHistory((h) => [...h, screen]);
+--
+925-  );
+926-
+927:  const goBack = useCallback(() => {
+928-    setScreenHistory((h) => {
+929-      if (h.length === 0) return h;
+--
+936-
+937-  // Generate a true Fisher-Yates shuffle order
+938:  const generateShuffleOrder = useCallback((excludeCurrentIdx: number = -1) => {
+939-    if (tracks.length === 0) {
+940-      shuffleOrder.current = [];
+--
+958-
+959-  // When shuffle is turned ON or track list changes, generate a new order
+960:  useEffect(() => {
+961-    const trackCountChanged = tracks.length !== prevTrackCountRef.current;
+962-    const shuffleJustEnabled = shuffle && !prevShuffleRef.current;
+--
+975-  }, [shuffle, tracks.length, generateShuffleOrder]);
+976-
+977:  const skipNext = useCallback(() => {
+978-    if (tracks.length === 0) return;
+979-    
+--
+998-  }, [currentTrack, tracks, shuffle, generateShuffleOrder]);
+999-
+1000:  const skipPrev = useCallback(() => {
+1001-    if (tracks.length === 0) return;
+1002-    
+--
+1020-
+1021-  // Hardware Back Button
+1022:  useEffect(() => {
+1023-    if (!Capacitor.isNativePlatform()) return;
+1024-    const listener = CapacitorApp.addListener('backButton', () => {
+--
+1035-
+1036-  // Media Session Integration
+1037:  useEffect(() => {
+1038-    if (!Capacitor.isNativePlatform()) return;
+1039-    if (currentTrack.title) {
+--
+1051-  }, [currentTrack]);
+1052-
+1053:  useEffect(() => {
+1054-    if (!Capacitor.isNativePlatform()) return;
+1055-    MediaSession.setPlaybackState({ playbackState: isPlaying ? 'playing' : 'paused' }).catch(console.error);
+1056-  }, [isPlaying]);
+1057-
+1058:  useEffect(() => {
+1059-    if (!Capacitor.isNativePlatform()) return;
+1060-    MediaSession.setActionHandler({ action: 'play' }, () => {
+--
+1073-
+1074-  // Web Audio Context initialization (crossfade + visualizer)
+1075:  const initWebAudio = useCallback(() => {
+1076-    if (audioCtxRef.current) return;
+1077-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+--
+1112-
+1113-  // Initial load logic
+1114:  useEffect(() => {
+1115-    const audioA = new Audio();
+1116-    audioA.crossOrigin = "anonymous";
+--
+1130-
+1131-  // Audio elements event binding
+1132:  useEffect(() => {
+1133-    const audioA = audioRefA.current;
+1134-    const audioB = audioRefB.current;
+--
+1195-
+1196-  // Sync volume to audio elements (or master gain when Web Audio is active)
+1197:  useEffect(() => {
+1198-    if (masterGainRef.current && audioCtxRef.current) {
+1199-      masterGainRef.current.gain.value = volume;
+--
+1205-
+1206-  // Playback control when currentTrack or isPlaying changes
+1207:  useEffect(() => {
+1208-    const active = audioRef.current;
+1209-    if (!active) return;
+--
+1285-
+1286-  // Helper: seek the audio element to a ratio (0-1) and update progress state
+1287:  const seekTo = useCallback((ratio: number) => {
+1288-    const clamped = Math.max(0, Math.min(1, ratio));
+1289-    setProgress(clamped);
+--
+1510-  };
+1511-
+1512:  const menuRef = useRef<HTMLDivElement>(null);
+1513:  const dragging = useRef(false);
+1514-
+1515-  const homeMenuItems = [
+--
+1554-  ];
+1555-
+1556:  const lastHapticIdx = useRef(-1);
+1557-
+1558-  const updateSelection = (y: number) => {
+--
+1572-  // cfOffsetRef holds the real-time (fractional) index position, e.g. 2.37
+1573-  // cflowIndex holds the snapped integer index for track info display
+1574:  const cfStartX = useRef(0);
+1575:  const cfStartTime = useRef(0);
+1576:  const cfVelocity = useRef(0);       // px/ms at release
+1577:  const cfOffsetRef = useRef(0);      // continuous floating index (source of truth during drag)
+1578:  const cfAnimRef = useRef<number>(0); // rAF handle
+1579:  const cfIsDragging = useRef(false);
+1580:  const carouselRef = useRef<HTMLDivElement>(null);
+1581:  const cfLastX = useRef(0);
+1582:  const cfLastTime = useRef(0);
+1583-
+1584-  // Apply transforms to DOM children directly — bypass React render cycle for 60fps
+1585:  const applyCarouselTransforms = useCallback((offsetF: number) => {
+1586-    if (!carouselRef.current) return;
+1587-    const children = carouselRef.current.children;
+--
+1630-
+1631-  // Spring snap to nearest integer index after release
+1632:  const springToIndex = useCallback((targetIdx: number, initialVelocity: number) => {
+1633-    cancelAnimationFrame(cfAnimRef.current);
+1634-    const STIFFNESS = 0.06;   // spring stiffness (lower = softer)
+--
+1667-
+1668-  // Sync transforms whenever cflowIndex or tracks change (initial render)
+1669:  useEffect(() => {
+1670-    cfOffsetRef.current = cflowIndex;
+1671-    applyCarouselTransforms(cflowIndex);
+--
+3243-  };
+3244-
+3245:  const globalTouchStartRef = useRef<{ x: number, y: number } | null>(null);
+3246-
+3247-  return (
